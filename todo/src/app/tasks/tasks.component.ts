@@ -1,17 +1,22 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 
 @Component({
   selector: 'app-tasks',
   templateUrl: './tasks.component.html',
   styleUrls: ['./tasks.component.css']
 })
-
-export class TasksComponent {
+export class TasksComponent implements OnInit {
   tasks: any[] = [];
   newTask: string = '';
+  showModal: boolean = false;
+  selectedTaskIndex: number | null = null;
 
-  addTask() {
-    if (this.newTask) {
+  ngOnInit(): void {
+    this.loadTasks();
+  }
+
+  addTask(): void {
+    if (this.newTask.trim()) {
       this.tasks.push({
         name: this.newTask,
         completed: false,
@@ -20,18 +25,40 @@ export class TasksComponent {
         timer: null
       });
       this.newTask = '';
+      this.saveTasks();
     }
   }
 
-  deleteTask(index: number) {
-    this.tasks.splice(index, 1);
+  confirmDelete(index: number): void {
+    this.selectedTaskIndex = index;
+    this.showModal = true;
   }
 
-  toggleCompletion(index: number) {
+  deleteTask(): void {
+    if (this.selectedTaskIndex !== null) {
+      this.tasks.splice(this.selectedTaskIndex, 1);
+      this.saveTasks();
+    }
+    this.closeModal();
+  }
+
+  toggleCompletion(index: number): void {
     this.tasks[index].completed = !this.tasks[index].completed;
+    this.saveTasks();
   }
 
-  startTimer(task: any) {
+  formatTime(seconds: number): string {
+    const hrs = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    let result = '';
+    if (hrs > 0) result += `${hrs} hora${hrs > 1 ? 's' : ''} `;
+    if (mins > 0) result += `${mins} minuto${mins > 1 ? 's' : ''} `;
+    result += `${secs} segundo${secs !== 1 ? 's' : ''}`;
+    return result;
+  }
+
+ startTimer(task: any) {
     if (!task.timer) {
       task.timer = setInterval(() => {
         task.elapsedTime++;
@@ -46,22 +73,15 @@ export class TasksComponent {
     }
   }
 
-  formatTime(seconds: number): string {
-    const hrs = Math.floor(seconds / 3600);
-    const mins = Math.floor((seconds % 3600) / 60);
-    const secs = seconds % 60;
-    let result = '';
-    if (hrs > 0) result += `${hrs} hora${hrs > 1 ? 's' : ''} `;
-    if (mins > 0) result += `${mins} minuto${mins > 1 ? 's' : ''} `;
-    result += `${secs} segundo${secs !== 1 ? 's' : ''}`;
-    return result;
+  closeModal(): void {
+    this.showModal = false;
   }
 
-  saveTasks() {
+   saveTasks(): void {
     localStorage.setItem('tasks', JSON.stringify(this.tasks));
   }
 
-  loadTasks() {
+   loadTasks(): void {
     const savedTasks = localStorage.getItem('tasks');
     if (savedTasks) {
       this.tasks = JSON.parse(savedTasks);

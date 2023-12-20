@@ -12,11 +12,27 @@
       </div>
       <div class="task-actions">
         <button class="btn-complete" (click)="toggleCompletion(i)">Concluir</button>
-        <button class="btn-delete" (click)="deleteTask(i)">Excluir</button>
+        <button class="btn-delete" (click)="confirmDelete(i)">Excluir</button>
         <button (click)="startTimer(task)">Iniciar Cronômetro</button>
         <button (click)="stopTimer(task)">Parar Cronômetro</button>
         <span *ngIf="task.elapsedTime" class="timer">{{ formatTime(task.elapsedTime) }}</span>
       </div>
     </li>
   </ul>
+</div>
+
+<div class="modal" [class.show-modal]="showModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>Confirmação</h2>
+      <span class="close-button" (click)="closeModal()">&times;</span>
+    </div>
+    <div class="modal-body">
+      <p>Tem certeza de que deseja excluir esta tarefa?</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-delete" (click)="deleteTask()">Sim</button>
+      <button class="btn-cancel" (click)="closeModal()">Não</button>
+    </div>
+  </div>
 </div>
